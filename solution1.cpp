@@ -5,6 +5,19 @@
 #include <iterator>
 using namespace std;
 
+bool isStaircase(list<int> staircase) {
+    list<int>::iterator it;
+    int previous = -1;
+
+    for (it = staircase.begin(); it != staircase.end(); it++) {
+        if (*it < previous) {
+            return false;
+        }
+        previous = *it;
+    }
+    return true;
+}
+
 int main() {
     string line;
     ifstream infile("input.txt");
@@ -25,3 +38,4 @@ int main() {
 
     return 0;
 }
+
