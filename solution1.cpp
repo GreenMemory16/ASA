@@ -2,7 +2,6 @@
 #include <string>
 #include <iostream>
 #include <list>
-#include <iterator>
 using namespace std;
 
 bool isStaircase(list<int> staircase) {
@@ -19,21 +18,19 @@ bool isStaircase(list<int> staircase) {
 }
 
 int main() {
-    string line;
     ifstream infile("input.txt");
 
     list<int> staircase;
 
-    int size_x = 0; 
-    int size_y = 0;
+    int size_x; 
+    int size_y;
+    int stair;
 
-    getline(infile, line);
-    size_x = stoi(line);
-    getline(infile, line);
-    size_y = stoi(line);
+    infile >> size_x;
+    infile >> size_y;
     
-    while (getline(infile, line)) {
-        staircase.push_back(stoi(line));
+    while (infile >> stair) {
+        staircase.push_back(stair);
     }
 
     return 0;
