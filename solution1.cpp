@@ -18,21 +18,23 @@ bool isStaircase(list<int> staircase) {
 }
 
 int main() {
-    ifstream infile("input.txt");
-
     list<int> staircase;
 
     int size_x; 
     int size_y;
     int stair;
 
-    infile >> size_x;
-    infile >> size_y;
+    cin >> size_x;
+    cin >> size_y;
     
-    while (infile >> stair) {
+    while (cin >> stair) {
         staircase.push_back(stair);
     }
+    cout << size_x << endl;
+    cout << size_y << endl;
 
+    for (list<int>::iterator it = staircase.begin(); it != staircase.end(); it++) 
+        cout << *it << endl;
     return 0;
 }
 
