@@ -1,0 +1,4 @@
+*.txt
+*.pdf
+*.out
+.vscode/c_cpp_properties.json
