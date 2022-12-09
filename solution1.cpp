@@ -1,12 +1,9 @@
 #include <string>
 #include <iostream>
 #include <list>
-#include <utility>
 
 using namespace std;
 
-
-int total = 0;
 /* IDEIAS
  *  - remover linha da lista sempre que se tornar 0
  *  - algum tipo de memoization ou semelhantes
@@ -20,11 +17,9 @@ bool isEmpty(list<int> &staircase) {
 	return true;
 }
 
-void print_stairs(list<int> &staircase, int num) {
-    cout << "remove bloco " << num << " da ESCADA " << total << endl;
+void print_stairs(list<int> &staircase) {
     for (list<int>::iterator it = staircase.begin(); it != staircase.end(); it++) 
         cout << *it << endl;
-    total++;
 }
 
 list<int>::iterator get_max(list<int> &staircase) { 
@@ -75,7 +70,7 @@ unsigned long long fill_staircase(list<int> &staircase) {
 	unsigned long long options = 0;
 	for (int i=0; i < max_tile; i++) {
 		list<int> new_stairs (staircase);
-		remove_block(new_stairs, max_line, i+1); // FIXME muda para o iterator em vez das escadas
+		remove_block(new_stairs, max_line, i+1); // FIXME
 		options += fill_staircase(new_stairs);
 	}
 
@@ -98,16 +93,9 @@ int main() {
         staircase.push_back(stair);
         counter--;
     }
-
-    cout << "INPUT:" << endl;
-
-    cout << size_x << endl;
-    cout << size_y << endl;
-
-    print_stairs(staircase, 0);
     
     int result = !isEmpty(staircase)? fill_staircase(staircase) : 0;
-    cout << "RESULT: " << result << endl;
+    cout << result << endl;
 
     return 0;
 }
