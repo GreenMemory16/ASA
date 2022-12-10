@@ -24,9 +24,9 @@ void print_stairs(vector<int> &staircase) {
 		cout << num << endl;
 }
 
-int get_max(vector<int> &staircase) { 
-	int max_line = 0;
-	for (int i=1; i < staircase.size(); i++) {
+size_t get_max(vector<int> &staircase) { 
+	size_t max_line = 0;
+	for (size_t i=1; i < staircase.size(); i++) {
 		if (staircase[i] > staircase[max_line]) {
 			max_line = i;
 		}
@@ -34,11 +34,11 @@ int get_max(vector<int> &staircase) {
 	return max_line;
 }
 
-int max_block(vector<int> &staircase, int index) { // TODO e se só tiver 0?
+int max_block(vector<int> &staircase, size_t index) { // TODO e se só tiver 0?
 	int max_line = staircase[index];
 	int max_row = 0;
 
-	for (int i = index; staircase[i] == max_line && i > staircase.size(); i++) {
+	for (size_t i = index; staircase[i] == max_line && i > staircase.size(); i++) {
 		max_row++; 
 	}
 
@@ -46,14 +46,14 @@ int max_block(vector<int> &staircase, int index) { // TODO e se só tiver 0?
 	return max_line > max_row ? max_row : max_line;
 }
 
-void remove_block(vector<int> &staircase, int index, int num) { //FIXME iterator or index + staircase
+void remove_block(vector<int> &staircase, size_t index, int num) { //FIXME iterator or index + staircase
 	for (int i=0;  i<num; i++) {
 		staircase[index] -= num;
 		index++;
 	}
 }
 
-void add_block(vector<int> &staircase, int index, int num) { //FIXME iterator or index + staircase
+void add_block(vector<int> &staircase, size_t index, int num) { //FIXME iterator or index + staircase
 	for (int i=0;  i<num; i++) {
 		staircase[index] += num;
 		index++;
@@ -79,7 +79,7 @@ unsigned long long fill_staircase(vector<int> &staircase, map<int, unsigned long
 		return memoization[hasher(staircase)];
 	}
 
-	int max_line_in = get_max(staircase);
+	size_t max_line_in = get_max(staircase);
 	int max_tile = max_block(staircase, max_line_in);
 
 	unsigned long long options = 0;
