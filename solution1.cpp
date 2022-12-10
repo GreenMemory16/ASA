@@ -13,7 +13,7 @@ using namespace std;
  */
 
 bool isEmpty(vector<int> &staircase) {
-	for (auto & num: staircase) {
+	for (int num: staircase) {
 		if (num != 0) return false;
 	}
 	return true;
@@ -38,7 +38,7 @@ int max_block(vector<int> &staircase, size_t index) { // TODO e se só tiver 0?
 	int max_line = staircase[index];
 	int max_row = 0;
 
-	for (size_t i = index; staircase[i] == max_line && i > staircase.size(); i++) {
+	for (size_t i = index; staircase[i] == max_line && i < staircase.size(); i++) {
 		max_row++; 
 	}
 
