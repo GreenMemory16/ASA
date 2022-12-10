@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <list>
+#include <map>
 
 using namespace std;
 
@@ -9,6 +10,23 @@ using namespace std;
  *  - algum tipo de memoization ou semelhantes
  *  - trocar list por vector (assim podemos aceder complexidade constante aos elementos)
  */
+
+map<list<int>, unsigned long long> memoization;
+
+string printList(list<int> lst) {
+    string s;
+    for (list<int>::iterator itr = lst.begin(); itr != lst.end(); itr++) {
+        s.append(to_string(*itr));
+        s.append(" ");
+    }
+    return s;
+}
+
+void printMemoization() {
+    for (auto const &pair: memoization) {
+        cout << "{" << printList(pair.first) << " : " << pair.second << "}" << endl;
+    }
+}
 
 bool isEmpty(list<int> &staircase) {
 	for (list<int>::iterator itr = staircase.begin(); itr != staircase.end(); itr++) {
@@ -64,6 +82,10 @@ unsigned long long fill_staircase(list<int> &staircase) {
 
 	if (isEmpty(staircase)) return 1; // TODO maybe check size and if there's only 1 line or row return aswell
 
+    if (memoization.count(staircase)) {
+        return memoization[staircase];
+    }
+
     list<int>::iterator max_line_itr = get_max(staircase);
     int max_tile = max_block(staircase), max_line = *max_line_itr;
 
@@ -73,6 +95,8 @@ unsigned long long fill_staircase(list<int> &staircase) {
 		remove_block(new_stairs, max_line, i+1); // FIXME
 		options += fill_staircase(new_stairs);
 	}
+
+    memoization.insert({staircase, options});
 
 	return options;
 }
@@ -94,7 +118,8 @@ int main() {
         counter--;
     }
     
-    int result = !isEmpty(staircase)? fill_staircase(staircase) : 0;
+    unsigned long long result = !isEmpty(staircase)? fill_staircase(staircase) : 0;
+
     cout << result << endl;
 
     return 0;
