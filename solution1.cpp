@@ -2,7 +2,6 @@
 #include <iostream>
 #include <list>
 #include <map>
-#include <unordered_map>
 
 using namespace std;
 
@@ -11,24 +10,6 @@ using namespace std;
  *  - remover linha da lista sempre que se tornar 0
  *  - trocar list por vector (assim podemos aceder complexidade constante aos elementos)
  */
-
-string printList(list<int> lst) {
-    string s;
-    for (list<int>::iterator itr = lst.begin(); itr != lst.end(); itr++) {
-        s.append(to_string(*itr));
-        s.append(" ");
-    }
-    return s;
-}
-
-int printMemoization(unordered_map<list<int>, unsigned long long>memoization) {
-    int i = 0;
-    for (auto const &pair: memoization) {
-        i++;
-        cout << "{" << printList(pair.first) << " : " << pair.second << "}" << endl;
-    }
-    return i;
-}
 
 bool isEmpty(list<int> &staircase) {
 	for (list<int>::iterator itr = staircase.begin(); itr != staircase.end(); itr++) {
@@ -71,34 +52,37 @@ int max_block(list<int> &staircase) { // TODO e se só tiver 0?
     return block;
 }
 
-void remove_block(list<int> &staircase, list<int>::iterator itr, int num) {
+void remove_block(list<int>::iterator itr, int num) {
 	for (int i=0;  i<num; i++) {
 		*itr -= num;
 		itr++;
 	}
 }
 
-void add_block(list<int> &staircase, list<int>::iterator itr, int num) {
+void add_block(list<int>::iterator itr, int num) {
 	for (int i=0;  i<num; i++) {
 		*itr += num;
 		itr++;
 	}
 }
 
-string stringify(list<int> staircase) {
-    string sum = "";
-    for (list<int>::iterator itr = staircase.begin(); itr != staircase.end(); itr++) {
-        sum.append(to_string(*itr));
+    size_t hasher(list<int> const& lst) {
+        size_t seed = lst.size();
+        for(auto x : lst) {
+            x = ((x >> 16) ^ x) * 0x45d9f3b;
+            x = ((x >> 16) ^ x) * 0x45d9f3b;
+            x = (x >> 16) ^ x;
+            seed ^= x + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+        return seed;
     }
-    return sum;
-}
 
-unsigned long long fill_staircase(list<int> &staircase, unordered_map<string, unsigned long long> &memoization) { 
+unsigned long long fill_staircase(list<int> &staircase, map<int, unsigned long long> &memoization) { 
 
 	if (isEmpty(staircase)) return 1; // TODO maybe check size and if there's only 1 line or row return aswell
 
-    if (memoization.count(stringify(staircase))) {
-        return memoization[stringify(staircase)];
+    if (memoization.count(hasher(staircase))) {
+        return memoization[hasher(staircase)];
     }
 
     list<int>::iterator max_line_itr = get_max(staircase);
@@ -107,18 +91,18 @@ unsigned long long fill_staircase(list<int> &staircase, unordered_map<string, un
 	unsigned long long options = 0;
 	for (int i=0; i < max_tile; i++) {
 
-		remove_block(staircase, max_line_itr, i+1); // FIXME
+		remove_block(max_line_itr, i+1); // FIXME
 		options += fill_staircase(staircase, memoization);
-        add_block(staircase, max_line_itr, i+1);
+        add_block(max_line_itr, i+1);
 	}
 
-    memoization.insert({stringify(staircase), options});
+    memoization.insert({hasher(staircase), options});
 
 	return options;
 }
 
 int main() {
-    unordered_map<string, unsigned long long> memoization;
+    map<int, unsigned long long> memoization;
     list<int> staircase;
 
     int size_x; 
@@ -137,8 +121,6 @@ int main() {
     
     unsigned long long result = !isEmpty(staircase)? fill_staircase(staircase, memoization) : 0;
     cout << result << endl;
-
-    //cout << "ITEMS: " << printMemoization(memoization);
 
     return 0;
 }
