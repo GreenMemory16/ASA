@@ -2,6 +2,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <unordered_map>
 
 using namespace std;
 
@@ -20,7 +21,7 @@ string printList(list<int> lst) {
     return s;
 }
 
-int printMemoization(map<list<int>, unsigned long long>memoization) {
+int printMemoization(unordered_map<list<int>, unsigned long long>memoization) {
     int i = 0;
     for (auto const &pair: memoization) {
         i++;
@@ -84,12 +85,20 @@ void add_block(list<int> &staircase, list<int>::iterator itr, int num) {
 	}
 }
 
-unsigned long long fill_staircase(list<int> &staircase, map<list<int>, unsigned long long> &memoization) { 
+string stringify(list<int> staircase) {
+    string sum = "";
+    for (list<int>::iterator itr = staircase.begin(); itr != staircase.end(); itr++) {
+        sum.append(to_string(*itr));
+    }
+    return sum;
+}
+
+unsigned long long fill_staircase(list<int> &staircase, unordered_map<string, unsigned long long> &memoization) { 
 
 	if (isEmpty(staircase)) return 1; // TODO maybe check size and if there's only 1 line or row return aswell
 
-    if (memoization.count(staircase)) {
-        return memoization[staircase];
+    if (memoization.count(stringify(staircase))) {
+        return memoization[stringify(staircase)];
     }
 
     list<int>::iterator max_line_itr = get_max(staircase);
@@ -103,13 +112,13 @@ unsigned long long fill_staircase(list<int> &staircase, map<list<int>, unsigned 
         add_block(staircase, max_line_itr, i+1);
 	}
 
-    memoization.insert({staircase, options});
+    memoization.insert({stringify(staircase), options});
 
 	return options;
 }
 
 int main() {
-    map<list<int>, unsigned long long> memoization;
+    unordered_map<string, unsigned long long> memoization;
     list<int> staircase;
 
     int size_x; 
