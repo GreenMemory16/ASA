@@ -3,6 +3,7 @@
 #include <list>
 #include <map>
 #include <vector>
+#include <chrono>
 
 using namespace std;
 
@@ -30,6 +31,7 @@ size_t get_max(vector<int> &staircase) {
 		if (staircase[i] > staircase[max_line]) {
 			max_line = i;
 		}
+		if (staircase[i] < staircase[max_line]) return max_line;
 	}
 	return max_line;
 }
@@ -111,9 +113,27 @@ int main() {
 		staircase.push_back(stair);
 		counter--;
 	}
-	
+	auto start = chrono::steady_clock::now();
 	unsigned long long result = !isEmpty(staircase)? fill_staircase(staircase, memoization) : 0;
 	cout << result << endl;
+
+	auto end = chrono::steady_clock::now();
+
+	cout << "Elapsed time in nanoseconds: "
+		<< chrono::duration_cast<chrono::nanoseconds>(end - start).count()
+		<< " ns" << endl;
+
+	cout << "Elapsed time in microseconds: "
+		<< chrono::duration_cast<chrono::microseconds>(end - start).count()
+		<< " µs" << endl;
+
+	cout << "Elapsed time in milliseconds: "
+		<< chrono::duration_cast<chrono::milliseconds>(end - start).count()
+		<< " ms" << endl;
+
+	cout << "Elapsed time in seconds: "
+		<< chrono::duration_cast<chrono::seconds>(end - start).count()
+		<< " sec"<< endl;
 
 	return 0;
 }
