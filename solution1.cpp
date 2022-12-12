@@ -3,6 +3,7 @@
 #include <list>
 #include <map>
 #include <vector>
+#include <chrono>
 
 using namespace std;
 
@@ -58,9 +59,9 @@ void add_block(vector<int> &staircase, size_t index, int num) {
 size_t hasher(vector<int> const& vec) {
 	size_t seed = vec.size();
 	for(auto x : vec) {
-		x = ((x >> 16) ^ x) * 0x45d9f3b;
-		x = ((x >> 16) ^ x) * 0x45d9f3b;
-		x = (x >> 16) ^ x;
+		x = ((x >> 8) ^ x) * 0x88b5U;
+		x = ((x >> 7) ^ x) * 0xdb2dU;
+    	x ^= x >> 9; 
 		seed ^= x + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 	}
 	return seed;
@@ -70,8 +71,9 @@ unsigned long long fill_staircase(vector<int> &staircase, map<int, unsigned long
 
 	if (isEmpty(staircase)) return 1; 
 
-	if (memoization.count(hasher(staircase))) {
-		return memoization[hasher(staircase)];
+	map<int, unsigned long long>::iterator itr = memoization.find(hasher(staircase));
+	if (itr != memoization.end()) {
+		return itr->second;
 	}
 
 	size_t max_line_in = get_max(staircase);
@@ -95,21 +97,18 @@ int main() {
 
 	int size_x; 
 	int size_y;
-	int counter;
 	int stair;
 
 	cin >> size_y;
 	cin >> size_x;
 	
-	counter = size_y;
-	while (cin >> stair && counter) {
+	while (cin >> stair) {
 		staircase.push_back(stair);
-		counter--;
 	}
 
 	unsigned long long result = !isEmpty(staircase)? fill_staircase(staircase, memoization) : 0;
 	cout << result << endl;
 
-	return 0;
+	return 0;	
 }
 
