@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -g
+CXXFLAGS = -O3 -std=c++11 -Wall -Wextra -g
 TARGETS = solution1
 
 .PHONY: all run clean

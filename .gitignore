@@ -1,4 +1,10 @@
 *.txt
 *.pdf
 *.out
-.vscode
+*.sh
+
+# sub-folders
+/*
+
+# executable
+solution1
