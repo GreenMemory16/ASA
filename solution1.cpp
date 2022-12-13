@@ -13,11 +13,6 @@ bool isEmpty(vector<int> &staircase) {
 	return true;
 }
 
-void print_stairs(vector<int> &staircase) {
-	for (auto & num: staircase)
-		cout << num << endl;
-}
-
 size_t get_max(vector<int> &staircase) { 
 	size_t max_line = 0;
 	for (size_t i=1; i < staircase.size(); i++) {
@@ -57,8 +52,8 @@ void add_block(vector<int> &staircase, size_t index, int num) {
 
 unsigned long long hasher(vector<int> const& vec) {
 	unsigned long long hash = 0;
-	for(int x : vec) {
-		hash = hash*10 + x;
+	for (int x : vec) {
+		hash = hash*100 + x;
 	}
 	return hash;
 }
