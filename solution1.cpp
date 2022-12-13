@@ -56,14 +56,16 @@ void add_block(vector<int> &staircase, size_t index, int num) {
 }
 
 size_t hasher(vector<int> const& vec) {
-	size_t seed = vec.size();
-	for(auto x : vec) {
-		x = ((x >> 16) ^ x) * 0x45d9f3b;
-		x = ((x >> 16) ^ x) * 0x45d9f3b;
-		x = (x >> 16) ^ x;
-		seed ^= x + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	size_t hash = vec.size();
+	for(int x : vec) {
+		x ^= (x >> 16);
+		x *= 0x45d9f3b;
+		x ^= (x >> 16);
+		x *= 0x45d9f3b;
+		x ^= (x >> 16);
+		hash ^= x + 0x9e3779b9 + (hash << 6) + (hash >> 2);
 	}
-	return seed;
+	return hash;
 }
 
 unsigned long long fill_staircase(vector<int> &staircase, map<int, unsigned long long> &memoization) { 
