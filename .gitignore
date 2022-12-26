@@ -4,7 +4,8 @@
 *.sh
 
 # sub-folders
-/*
+*/*
 
 # executable
 solution1
+solution2
