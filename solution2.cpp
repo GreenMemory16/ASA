@@ -7,6 +7,7 @@
 using namespace std;
 
 typedef struct node{
+    int num;
     int weight;
     int predecessor;
 } node;
@@ -14,59 +15,71 @@ typedef struct node{
 /*  */
 void initialize_nodes(vector<struct node> &nodes) {
     for (size_t i=0; i < nodes.size(); i++) {
-        nodes[i].weight = 0;
+        nodes[i].num = i;
+        nodes[i].weight = -1;
         nodes[i].predecessor = -1;
     }
 }
 
-/* putWeightAdjacentNodes --> getar os nodes adjacentes e mudar o seu peso
- */
-
-void putWeightAdjacentNodes(vector<vector<int>> &matrix, int index, vector<struct node> &nodes) {
-    size_t n_nodes = nodes.size();
-    for (size_t i=0; i < n_nodes; i++) {
-        if (matrix[index][i] != 0 && nodes[i].weight < matrix[index][i]) { //dar double check à comparação
-            nodes[i].weight = matrix[index][i];
-            nodes[i].predecessor = index;
-        }
-    }
-}
-
-/* getNonSelectedButWithWeight --> 
- * retornar o próximo node a analisar (n tá nos selected mas tem weight e o seu weight é máximo)
- */
-
-int getNonSelectedButWithWeight(vector<struct node> &nodes, set<int> &selected) {
+int selectNextNode(vector<struct node> &nodes, set<int> &selected, vector<vector<int>> &matrix, int predec, int &result) {
     int max = 0;
-    int index = 0;
-    for (size_t i = 0; i < nodes.size(); i++) {
-        if (nodes[i].weight >= max && selected.find(i) == selected.end()) {
-            max = nodes[i].weight;
-            index = i;
+    int index = -1;
+
+    for (auto node : selected) {
+        for (size_t i = 0; i < nodes.size(); i++) {
+            if (matrix[node][i] != 0 && selected.find(i) == selected.end()) {
+                if (matrix[node][i] > max) {
+                    max = matrix[node][i];
+                    index = i;
+                }
+            }
         }
     }
+
+
+    if (index == -1) return index;
+
+    nodes[index].predecessor = predec;
+    nodes[index].weight = nodes[predec].weight + max;
+    nodes[index].num = index;
+
+    result += max;
+
     return index;
 }
 
-int traverseGraph(vector<vector<int>> matrix, size_t n_nodes) {
+int traverseGraph(vector<vector<int>> &matrix, size_t &n_nodes) {
     int result = 0;
     vector<struct node> nodes (n_nodes);
     set<int> selected;
+    int predec = 0;
 
     initialize_nodes(nodes);
     
-    nodes[0].weight = INT8_MAX; //maybe outro numero??
+    nodes[0].weight = 0; //maybe outro numero??
     nodes[0].predecessor = -1;
+    selected.insert(0);
 
-    //does prims algorithm
     while (selected.size() < n_nodes) {
-        int index = getNonSelectedButWithWeight(nodes, selected);
+        int index = selectNextNode(nodes, selected, matrix, predec, result);
+        predec = index;
+        
+        if (index == -1) {
+            for (auto node : nodes) {
+                if (node.weight == -1) {
+                    predec = node.num;
+                    index = node.num;
+                    nodes[predec].weight = result;
+                    selected.insert(index);
+
+                    index = node.num;
+                    break;
+                }
+            }
+        }
+
         selected.insert(index);
-        putWeightAdjacentNodes(matrix, index, nodes);
-    }
-    
-    for (size_t i=1; i < n_nodes; i++) {
-        result += nodes[i].weight;
+
     }
 
     return result;
@@ -136,6 +149,7 @@ int main() {
 
     graphPrinter(matrix);
 
-    cout << traverseGraph(matrix, n_nodes);
+    cout << traverseGraph(matrix, n_nodes) << endl;
 
+    return 0;
 }
