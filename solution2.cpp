@@ -13,7 +13,7 @@ typedef struct node{
 } node;
 
 /*  */
-void initialize_nodes(vector<struct node> &nodes) {
+void initialize_nodes(vector<node> &nodes) {
     for (size_t i=0; i < nodes.size(); i++) {
         nodes[i].num = i;
         nodes[i].weight = -1;
@@ -21,17 +21,17 @@ void initialize_nodes(vector<struct node> &nodes) {
     }
 }
 
-int selectNextNode(vector<struct node> &nodes, set<int> &selected, vector<vector<int>> &matrix, int predec, int &result) {
+int selectNextNode(vector<node> &nodes, set<int> &selected, vector<vector<int>> &matrix) {
     int max = 0;
     int index = -1;
+    int predec = -1;
 
-    for (auto node : selected) {
+    for (auto node_in : selected) {
         for (size_t i = 0; i < nodes.size(); i++) {
-            if (matrix[node][i] != 0 && selected.find(i) == selected.end()) {
-                if (matrix[node][i] > max) {
-                    max = matrix[node][i];
-                    index = i;
-                }
+            if (matrix[node_in][i] > max && selected.find(i) == selected.end()) {
+                max = matrix[node_in][i];
+                index = i;
+                predec = node_in;
             }
         }
     }
@@ -40,39 +40,30 @@ int selectNextNode(vector<struct node> &nodes, set<int> &selected, vector<vector
     if (index == -1) return index;
 
     nodes[index].predecessor = predec;
-    nodes[index].weight = nodes[predec].weight + max;
-    nodes[index].num = index;
-
-    result += max;
+    nodes[index].weight = max;
 
     return index;
 }
 
 int traverseGraph(vector<vector<int>> &matrix, size_t &n_nodes) {
     int result = 0;
-    vector<struct node> nodes (n_nodes);
+    vector<node> nodes (n_nodes);
     set<int> selected;
-    int predec = 0;
 
     initialize_nodes(nodes);
     
-    nodes[0].weight = 0; //maybe outro numero??
-    nodes[0].predecessor = -1;
+    nodes[0].weight = 0;
     selected.insert(0);
 
     while (selected.size() < n_nodes) {
-        int index = selectNextNode(nodes, selected, matrix, predec, result);
-        predec = index;
+        int index = selectNextNode(nodes, selected, matrix);
         
         if (index == -1) {
             for (auto node : nodes) {
                 if (node.weight == -1) {
-                    predec = node.num;
                     index = node.num;
-                    nodes[predec].weight = result;
-                    selected.insert(index);
-
-                    index = node.num;
+                    nodes[index].weight = 0;
+                    
                     break;
                 }
             }
@@ -80,6 +71,10 @@ int traverseGraph(vector<vector<int>> &matrix, size_t &n_nodes) {
 
         selected.insert(index);
 
+    }
+
+    for (size_t i=1; i < n_nodes; i++) {
+        result += nodes[i].weight;
     }
 
     return result;
@@ -94,39 +89,12 @@ void graphPrinter(vector<vector<int>> graph) {
     }
 }
 
-void removeDupWord(string str, int &n1, int &n2, int &val) {
-    string word = "";
-    int counter = 0;
-    for (size_t x = 0; x < str.length(); x++) {
-        if (x == str.length() - 1) {
-            val = stoi(str.substr(x));
-        }
-
-        if (str[x] == ' ') {
-            if (counter == 0) {
-                n1 = stoi(word);
-                counter++;
-            }
-            else if (counter == 1) {
-                n2 = stoi(word);
-                counter++;
-            }
-            word = "";
-        }
-        else {
-            word = word + str[x];
-        }
-    }
-}
-
 int main() {
     size_t n_nodes;
     int n_edges;
     int n1 = 0;
     int n2 = 0;
     int val = 0;
-    string input;
-    string line;
 
     cin >> n_nodes;
     cin >> n_edges;
@@ -137,11 +105,7 @@ int main() {
         matrix[i].resize(n_nodes);
     }
 
-    // to skip a weird line that i dont know why it's appearing
-    getline(cin, line);
-
-    while (getline(cin, line) && n_edges + 1) {
-        removeDupWord(line, n1, n2, val);
+    while (cin >> n1 >> n2 >> val && n_edges) {
         matrix[n1-1][n2-1] = val;
         matrix[n2-1][n1-1] = val;
         n_edges--;
