@@ -61,67 +61,7 @@ void printHeap(vector<edge_ptr2> heap) {
     cout << "DONE" << endl;
 }
 
-
-void addEdge(vector<edge_ptr> &adjacency, int val1, int val2, int weight) {
-    edge_ptr first_edge = new edge(val1, val2, weight, adjacency[val1]);
-    edge_ptr second_edge = new edge(val2, val1, weight, adjacency[val2]);
-    
-    adjacency[val1] = first_edge;
-    adjacency[val2] = second_edge;
-}
-
-void initialize_nodes(vector<int> &nodes) {
-    for (size_t i=0; i < nodes.size(); i++) {
-        nodes[i] = -1;
-    }
-}
-
-int selectNextNode(vector<int> &nodes, set<int> &selected, vector<edge_ptr> &adjacent) {
-    int max = 0;
-    int index = -1;
-
-    for (auto node_in : selected) {
-        edge_ptr head = adjacent[node_in];
-        while (head != nullptr) {
-            if (head->_weight > max && selected.find(head->_dest) == selected.end()) {
-                max = head->_weight;
-                index = head->_dest;
-            }
-            head = head->_next;
-        }
-    }
-
-    if (index == -1) return index;
-
-    nodes[index] = max;
-
-    return index;
-}
-
-int selectNextNode2(vector<int> &nodes, set<int> &selected, vector<edge_ptr> &adjacent) {
-    int max = 0;
-    int index = -1;
-
-    // get the biggest edge from the heap from a selected node
-    while (true) {
-        edge_ptr edge = adjacent.front();
-        if (selected.find(edge->_from) == selected.end()) {
-            index = edge->_dest;
-            max = edge->_weight;
-
-            adjacent.pop_back();
-            break;
-        }
-    }
-
-    if (index == -1) return index;
-
-    nodes[index] = max;
-
-    return index;
-}
-
-int selectNextNode3(vector<edge_ptr2> &my_edges, set<int> &selected, vector<node_ptr> &my_nodes, int previous) {
+int selectNextNode(vector<edge_ptr2> &my_edges, set<int> &selected, vector<node_ptr> &my_nodes, int previous) {
     int max = 0;
     int index = -1;
 
@@ -158,44 +98,9 @@ int selectNextNode3(vector<edge_ptr2> &my_edges, set<int> &selected, vector<node
     return index;
 }
 
-int traverseGraph(vector<edge_ptr> &adjacent, size_t &n_nodes) {
-    int result = 0;
-    vector<int> nodes (n_nodes);
-    set<int> selected;
 
-    initialize_nodes(nodes);
-    
-    nodes[0] = 0;
-    selected.insert(0);
 
-    while (selected.size() < n_nodes) {
-        int index = selectNextNode2(nodes, selected, adjacent);
-
-        cout << "index: " << index << endl;
-
-        
-        if (index == -1) {
-            for (size_t i = 0; i < n_nodes; i++) {
-                if (nodes[i] == -1) {
-                    nodes[i] = 0;
-                    index = i;
-                    
-                    break;
-                }
-            }
-        }
-
-        selected.insert(index);
-    }
-
-    for (size_t i=1; i < n_nodes; i++) {
-        result += nodes[i];
-    }
-
-    return result;
-}
-
-int traverseGraph2(vector<node_ptr> &my_nodes, size_t &n_nodes) {
+int traverseGraph(vector<node_ptr> &my_nodes, size_t &n_nodes) {
     int previous = 0;
     set<int> selected;
     vector<edge_ptr2> my_edges;
@@ -205,7 +110,7 @@ int traverseGraph2(vector<node_ptr> &my_nodes, size_t &n_nodes) {
     selected.insert(0);
 
     while (selected.size() < n_nodes) {
-        int index = selectNextNode3(my_edges, selected, my_nodes, previous);
+        int index = selectNextNode(my_edges, selected, my_nodes, previous);
 
         if (index == -1) {
             for (size_t i = 0; i < n_nodes; i++) {
@@ -231,8 +136,6 @@ int traverseGraph2(vector<node_ptr> &my_nodes, size_t &n_nodes) {
     return my_nodes[previous]->_weight;
 }
 
-
-
 void graphPrinter(vector<vector<int>> graph) {
     for (size_t i = 0; i < graph.size(); i++) {
         for (size_t j = 0; j < graph[i].size(); j++) {
@@ -252,18 +155,6 @@ void listPrinter(vector<edge_ptr> adjacent) {
     }
 }
 
-void deleteAdjacent(vector<edge_ptr> &to_delete) {
-    edge_ptr head, next;
-    for (size_t i = 0; i < to_delete.size(); i++) {
-        head = to_delete[i];
-        while (head != nullptr) {
-            next = head->_next;
-            delete head;
-            head = next;
-        }
-    }
-}
-
 int main() {
     size_t n_nodes;
     int n_edges;
@@ -275,7 +166,6 @@ int main() {
     cin >> n_edges;
     
     vector<node_ptr> my_nodes (n_nodes, nullptr);
-    vector<edge_ptr> adjacent (n_nodes, nullptr);
 
     for (size_t i = 0; i < n_nodes; i++) {
         my_nodes[i] = new node;
@@ -297,18 +187,7 @@ int main() {
         my_nodes[n2-1]->edges.push_back(new_edge2);
     }
 
-    cout << traverseGraph2(my_nodes, n_nodes) << endl;
-
-    // while (cin >> n1 >> n2 >> val && n_edges) {
-    //     addEdge(adjacent, n1-1, n2-1 ,val);
-    //     n_edges--;
-    // }
-
-    //make_heap(adjacent.begin(), adjacent.end(), greastest());
-
-    //cout << traverseGraph(adjacent, n_nodes) << endl;
-
-    deleteAdjacent(adjacent);
+    cout << traverseGraph(my_nodes, n_nodes) << endl;
 
     return 0;
 }
