@@ -6,63 +6,79 @@
 
 using namespace std;
 
-typedef struct node{
-    int num;
-    int weight;
-    int predecessor;
-} node;
+class edge {
+    public:
+        int _dest;
+        int _weight;
+        edge* _next;
+        edge(int dest, int weight) {
+            _dest = dest;
+            _weight = weight;
+            _next = nullptr;
+        }
+        edge(int dest, int weight, edge* ptr) {
+            _dest = dest;
+            _weight = weight;
+            _next = ptr;
+        }
+};
 
-/*  */
-void initialize_nodes(vector<node> &nodes) {
+typedef struct edge* edge_ptr;
+
+void addEdge(vector<edge_ptr> &adjacency, int val1, int val2, int weight) {
+    edge_ptr first_edge = new edge(val2, weight, adjacency[val1]);
+    edge_ptr second_edge = new edge(val1, weight, adjacency[val2]);
+    
+    adjacency[val1] = first_edge;
+    adjacency[val2] = second_edge;
+}
+
+void initialize_nodes(vector<int> &nodes) {
     for (size_t i=0; i < nodes.size(); i++) {
-        nodes[i].num = i;
-        nodes[i].weight = -1;
-        nodes[i].predecessor = -1;
+        nodes[i] = -1;
     }
 }
 
-int selectNextNode(vector<node> &nodes, set<int> &selected, vector<vector<int>> &matrix) {
+int selectNextNode(vector<int> &nodes, set<int> &selected, vector<edge_ptr> &adjacent) {
     int max = 0;
     int index = -1;
-    int predec = -1;
 
     for (auto node_in : selected) {
-        for (size_t i = 0; i < nodes.size(); i++) {
-            if (matrix[node_in][i] > max && selected.find(i) == selected.end()) {
-                max = matrix[node_in][i];
-                index = i;
-                predec = node_in;
+        edge_ptr head = adjacent[node_in];
+        while (head != nullptr) {
+            if (head->_weight > max && selected.find(head->_dest) == selected.end()) {
+                max = head->_weight;
+                index = head->_dest;
             }
+            head = head->_next;
         }
     }
 
-
     if (index == -1) return index;
 
-    nodes[index].predecessor = predec;
-    nodes[index].weight = max;
+    nodes[index] = max;
 
     return index;
 }
 
-int traverseGraph(vector<vector<int>> &matrix, size_t &n_nodes) {
+int traverseGraph(vector<edge_ptr> &adjacent, size_t &n_nodes) {
     int result = 0;
-    vector<node> nodes (n_nodes);
+    vector<int> nodes (n_nodes);
     set<int> selected;
 
     initialize_nodes(nodes);
     
-    nodes[0].weight = 0;
+    nodes[0] = 0;
     selected.insert(0);
 
     while (selected.size() < n_nodes) {
-        int index = selectNextNode(nodes, selected, matrix);
+        int index = selectNextNode(nodes, selected, adjacent);
         
         if (index == -1) {
-            for (auto node : nodes) {
-                if (node.weight == -1) {
-                    index = node.num;
-                    nodes[index].weight = 0;
+            for (size_t i = 0; i < n_nodes; i++) {
+                if (nodes[i] == -1) {
+                    nodes[i] = 0;
+                    index = i;
                     
                     break;
                 }
@@ -74,7 +90,7 @@ int traverseGraph(vector<vector<int>> &matrix, size_t &n_nodes) {
     }
 
     for (size_t i=1; i < n_nodes; i++) {
-        result += nodes[i].weight;
+        result += nodes[i];
     }
 
     return result;
@@ -89,6 +105,28 @@ void graphPrinter(vector<vector<int>> graph) {
     }
 }
 
+void listPrinter(vector<edge_ptr> adjacent) {
+    for (size_t i = 0; i < adjacent.size(); i++) {
+        edge_ptr head = adjacent[i];
+        while (head != nullptr) {
+            cout << "(" << i << ", " << head->_dest << ") ->" << head->_weight << endl;
+            head = head->_next;
+        }
+    }
+}
+
+void deleteAdjacent(vector<edge_ptr> &to_delete) {
+    edge_ptr head, next;
+    for (size_t i = 0; i < to_delete.size(); i++) {
+        head = to_delete[i];
+        while (head != nullptr) {
+            next = head->_next;
+            delete head;
+            head = next;
+        }
+    }
+}
+
 int main() {
     size_t n_nodes;
     int n_edges;
@@ -99,21 +137,16 @@ int main() {
     cin >> n_nodes;
     cin >> n_edges;
 
-    vector<vector<int>> matrix(n_nodes);
-
-    for (size_t i = 0; i < n_nodes; i++) {
-        matrix[i].resize(n_nodes);
-    }
+    vector<edge_ptr> adjacent (n_nodes, nullptr);
 
     while (cin >> n1 >> n2 >> val && n_edges) {
-        matrix[n1-1][n2-1] = val;
-        matrix[n2-1][n1-1] = val;
+        addEdge(adjacent, n1-1, n2-1 ,val);
         n_edges--;
     }
 
-    graphPrinter(matrix);
+    cout << traverseGraph(adjacent, n_nodes) << endl;
 
-    cout << traverseGraph(matrix, n_nodes) << endl;
+    deleteAdjacent(adjacent);
 
     return 0;
 }
