@@ -53,7 +53,7 @@ int kruskal(vector<int> &parents, vector<int> &ranks, edge_queue &edges) {
     int result = 0;
     edge_ptr head;
 
-    while (edges.size() != 1) {
+    while (!edges.empty()) {
         head = edges.top();
         if (getParent(head->_val1, parents) != getParent(head->_val2, parents)) {
             result += head->_weight;
