@@ -3,128 +3,66 @@
 #include <vector>
 #include <cstring>
 #include <set>
+#include <queue>
 
 using namespace std;
 
 class edge {
     public:
-        int _dest;
+        int _val1;
+        int _val2;
         int _weight;
-        edge* _next;
-        edge(int dest, int weight) {
-            _dest = dest;
+        
+        edge(int val1, int val2, int weight) {
+            _val1 = val1;
+            _val2 = val2;
             _weight = weight;
-            _next = nullptr;
-        }
-        edge(int dest, int weight, edge* ptr) {
-            _dest = dest;
-            _weight = weight;
-            _next = ptr;
         }
 };
 
 typedef struct edge* edge_ptr;
 
-void addEdge(vector<edge_ptr> &adjacency, int val1, int val2, int weight) {
-    edge_ptr first_edge = new edge(val2, weight, adjacency[val1]);
-    edge_ptr second_edge = new edge(val1, weight, adjacency[val2]);
-    
-    adjacency[val1] = first_edge;
-    adjacency[val2] = second_edge;
-}
-
-void initialize_nodes(vector<int> &nodes) {
-    for (size_t i=0; i < nodes.size(); i++) {
-        nodes[i] = -1;
-    }
-}
-
-int selectNextNode(vector<int> &nodes, set<int> &selected, vector<edge_ptr> &adjacent) {
-    int max = 0;
-    int index = -1;
-
-    for (auto node_in : selected) {
-        edge_ptr head = adjacent[node_in];
-        while (head != nullptr) {
-            if (head->_weight > max && selected.find(head->_dest) == selected.end()) {
-                max = head->_weight;
-                index = head->_dest;
-            }
-            head = head->_next;
+class edge_comparison {
+    public:
+        edge_comparison() {};
+        bool operator() (const edge_ptr &n1, const edge_ptr &n2) const {
+            return n1->_weight < n2->_weight;
         }
-    }
+};
 
-    if (index == -1) return index;
+typedef priority_queue<edge_ptr, vector<edge_ptr>, edge_comparison> edge_queue;
 
-    nodes[index] = max;
-
-    return index;
+int getParent(int node, vector<int> &parents) {
+    if (parents[node] != node) return getParent(parents[node], parents);
+    return node;
 }
 
-int traverseGraph(vector<edge_ptr> &adjacent, size_t &n_nodes) {
+void addEdge(edge_ptr &head, vector<int> &parents, vector<int> &ranks) {
+    int val1 = getParent(head->_val1, parents);
+    int val2 = getParent(head->_val2, parents);
+
+    if (ranks[val1] < ranks[val2]) parents[val1] = val2;
+    else if (ranks[val1] > ranks[val2]) parents[val2] = val1;
+    else {
+        ranks[val1]++;
+        parents[val2] = val1;
+    }
+}
+
+int kruskal(vector<int> &parents, vector<int> &ranks, edge_queue &edges) {
     int result = 0;
-    vector<int> nodes (n_nodes);
-    set<int> selected;
+    edge_ptr head;
 
-    initialize_nodes(nodes);
-    
-    nodes[0] = 0;
-    selected.insert(0);
-
-    while (selected.size() < n_nodes) {
-        int index = selectNextNode(nodes, selected, adjacent);
-        
-        if (index == -1) {
-            for (size_t i = 0; i < n_nodes; i++) {
-                if (nodes[i] == -1) {
-                    nodes[i] = 0;
-                    index = i;
-                    
-                    break;
-                }
-            }
+    while (edges.size() != 1) {
+        head = edges.top();
+        if (getParent(head->_val1, parents) != getParent(head->_val2, parents)) {
+            result += head->_weight;
+            addEdge(head, parents, ranks);
         }
-
-        selected.insert(index);
-
-    }
-
-    for (size_t i=1; i < n_nodes; i++) {
-        result += nodes[i];
+        edges.pop();
     }
 
     return result;
-}
-
-void graphPrinter(vector<vector<int>> graph) {
-    for (size_t i = 0; i < graph.size(); i++) {
-        for (size_t j = 0; j < graph[i].size(); j++) {
-            cout << graph[i][j] << " ";
-        }
-        cout << endl;
-    }
-}
-
-void listPrinter(vector<edge_ptr> adjacent) {
-    for (size_t i = 0; i < adjacent.size(); i++) {
-        edge_ptr head = adjacent[i];
-        while (head != nullptr) {
-            cout << "(" << i << ", " << head->_dest << ") ->" << head->_weight << endl;
-            head = head->_next;
-        }
-    }
-}
-
-void deleteAdjacent(vector<edge_ptr> &to_delete) {
-    edge_ptr head, next;
-    for (size_t i = 0; i < to_delete.size(); i++) {
-        head = to_delete[i];
-        while (head != nullptr) {
-            next = head->_next;
-            delete head;
-            head = next;
-        }
-    }
 }
 
 int main() {
@@ -137,16 +75,21 @@ int main() {
     cin >> n_nodes;
     cin >> n_edges;
 
-    vector<edge_ptr> adjacent (n_nodes, nullptr);
+    vector<int> parents(n_nodes);
+    vector<int> ranks(n_nodes, 0);
+    edge_queue edges;
+
+    for (size_t i = 0; i < n_nodes; i++) {
+        parents[i] = i;
+    }
 
     while (cin >> n1 >> n2 >> val && n_edges) {
-        addEdge(adjacent, n1-1, n2-1 ,val);
+        edge_ptr new_edge = new edge(n1-1, n2-1, val);
+        edges.push(new_edge);
         n_edges--;
     }
 
-    cout << traverseGraph(adjacent, n_nodes) << endl;
-
-    deleteAdjacent(adjacent);
+    cout << kruskal(parents, ranks, edges) << endl;
 
     return 0;
 }
