@@ -10,43 +10,46 @@ class edge {
         int _val2;
         int _weight;
         
-        edge(int val1, int val2, int weight) {
+        edge() {}
+        
+        void setValues(int val1, int val2, int weight) {
             _val1 = val1;
             _val2 = val2;
             _weight = weight;
         }
+
+        bool operator < (const edge& ed) const {
+            return (_weight < ed._weight);
+        }
 };
 
-typedef struct edge* edge_ptr;
+typedef edge* edge_ptr;
 
 int getParent(int node, vector<int> &parents) {
     if (parents[node] != node) return getParent(parents[node], parents);
     return node;
 }
 
-void addEdge(edge_ptr &head, vector<int> &parents, vector<int> &ranks) {
-    int val1 = getParent(head->_val1, parents);
-    int val2 = getParent(head->_val2, parents);
-
-    if (ranks[val1] < ranks[val2]) parents[val1] = val2;
-    else if (ranks[val1] > ranks[val2]) parents[val2] = val1;
+void updateNodes(int parent1, int parent2, vector<int> &parents, vector<int> &ranks) {
+    if (ranks[parent1] < ranks[parent2]) parents[parent1] = parent2;
+    else if (ranks[parent1] > ranks[parent2]) parents[parent2] = parent1;
     else {
-        ranks[val1]++;
-        parents[val2] = val1;
+        ranks[parent1]++;
+        parents[parent2] = parent1;
     }
 }
 
-int kruskal(vector<int> &parents, vector<int> &ranks, vector<edge_ptr> &edges) {
+int kruskal(vector<int> &parents, vector<int> &ranks, vector<edge> &edges) { // n
     int result = 0;
-    edge_ptr head;
 
-    while (!edges.empty()) {
-        head = edges.back();
-        if (getParent(head->_val1, parents) != getParent(head->_val2, parents)) {
-            result += head->_weight;
-            addEdge(head, parents, ranks);
+    for (vector<edge>::iterator itr = edges.begin(); itr != edges.end(); itr++) {
+        edge head = *(itr);
+        int parent1 = getParent(head._val1, parents);
+        int parent2 = getParent(head._val2, parents);
+        if (parent1 != parent2) {
+            result += head._weight;
+            updateNodes(parent1, parent2, parents, ranks);
         }
-        edges.pop_back();
     }
 
     return result;
@@ -64,23 +67,20 @@ int main() {
 
     vector<int> parents(n_nodes);
     vector<int> ranks(n_nodes, 0);
-    vector<edge_ptr> edges (n_edges);
+    vector<edge> edges (n_edges);
 
     for (size_t i = 0; i < n_nodes; i++) {
         parents[i] = i;
     }
 
-    int i = 0;
+    int i=0;
     while (cin >> n1 >> n2 >> val && n_edges) {
-        edge_ptr new_edge = new edge(n1-1, n2-1, val);
-        edges[i] = new_edge;
+        edges[i].setValues(n1-1, n2-1, val);
         n_edges--;
         i++;
     }
 
-    sort(edges.begin(), edges.end(), [](edge_ptr &e1, edge_ptr &e2) {
-        return (e1->_weight < e2->_weight);
-    });
+    sort(edges.rbegin(), edges.rend());
 
     cout << kruskal(parents, ranks, edges) << endl;
 
