@@ -6,24 +6,22 @@ using namespace std;
 
 class edge {
     public:
-        int _val1;
-        int _val2;
-        int _weight;
+        int val1;
+        int val2;
+        int weight;
         
         edge() {}
         
-        void setValues(int val1, int val2, int weight) {
-            _val1 = val1;
-            _val2 = val2;
-            _weight = weight;
+        void setValues(int v1, int v2, int w) {
+            val1 = v1;
+            val2 = v2;
+            weight = w;
         }
 
         bool operator < (const edge& ed) const {
-            return (_weight < ed._weight);
+            return (weight < ed.weight);
         }
 };
-
-typedef edge* edge_ptr;
 
 int getParent(int node, vector<int> &parents) {
     if (parents[node] != node) return getParent(parents[node], parents);
@@ -44,10 +42,12 @@ int kruskal(vector<int> &parents, vector<int> &ranks, vector<edge> &edges) { // 
 
     for (vector<edge>::iterator itr = edges.begin(); itr != edges.end(); itr++) {
         edge head = *(itr);
-        int parent1 = getParent(head._val1, parents);
-        int parent2 = getParent(head._val2, parents);
+
+        int parent1 = getParent(head.val1, parents);
+        int parent2 = getParent(head.val2, parents);
+
         if (parent1 != parent2) {
-            result += head._weight;
+            result += head.weight;
             updateNodes(parent1, parent2, parents, ranks);
         }
     }
@@ -58,12 +58,10 @@ int kruskal(vector<int> &parents, vector<int> &ranks, vector<edge> &edges) { // 
 int main() {
     size_t n_nodes;
     int n_edges;
-    int n1 = 0;
-    int n2 = 0;
-    int val = 0;
+    int n1, n2, val;
 
-    cin >> n_nodes;
-    cin >> n_edges;
+    if (!scanf("%li", &n_nodes)) return EXIT_FAILURE;
+    if (!scanf("%i", &n_edges)) return EXIT_FAILURE;
 
     vector<int> parents(n_nodes);
     vector<int> ranks(n_nodes, 0);
@@ -73,11 +71,8 @@ int main() {
         parents[i] = i;
     }
 
-    int i=0;
-    while (cin >> n1 >> n2 >> val && n_edges) {
+    for (int i = 0; n_edges && scanf("%i %i %i", &n1, &n2, &val); n_edges--, i++) {
         edges[i].setValues(n1-1, n2-1, val);
-        n_edges--;
-        i++;
     }
 
     sort(edges.rbegin(), edges.rend());

@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -O3 -std=c++11 -Wall -Wextra -g
+CXXFLAGS = -O3 -std=c++11 -Wall -g
 TARGETS = solution2
 TESTS = $(wildcard tests/*)
 
